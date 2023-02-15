@@ -1,0 +1,12 @@
+// закинуть в шаблон сайта в папку libs
+
+// закинуть все картинки
+
+// подключить в header
+    Asset::getInstance()->addCss("/local/libs/pixel-perfect/style.css");
+    Asset::getInstance()->addJs("/local/libs/pixel-perfect/pixel-perfect.js");
+
+// в шаблоне вызвать
+<script>
+    new PixelPerfect(".класс", "<?=SITE_TEMPLATE_PATH?>");
+</script>
