@@ -1,10 +1,16 @@
 class PixelPerfect{
-    buttonOpenClose;
-    buttonExtension;
+    widthImage;
+    heightImage;
+    opacityImage;
+    $items;
+    $image;
 
     constructor(section, path = ""){
         this.$section = $(section);
         this.$body = $("body");
+        this.widthImage = Number(localStorage.getItem("EXTENSION_WIDTH"));
+        this.heightImage = Number(localStorage.getItem("EXTENSION_HEIGHT"));
+        this.opacityImage = Number(localStorage.getItem("OPACITY_IMAGE"));
         this.$body.html(this.$section);
 
         $.ajax({
@@ -14,57 +20,98 @@ class PixelPerfect{
                 this.$section.css({"position": "relative"});
                 this.$body.append(`
                     <div class="pixel-perfect">
-                        <span>PixelPerfect</span>
-                        <div class="pixel-perfect__control">
-                            <button class="btn btn-success js-pixel-perfect-control-open-close">Открыть</button>
+                        <div class="pixel-perfect__settings js-pixel-perfect-settings">
+                            <input type="range" id="opacity" name="opacity" min="0" max="100" step="10">
+                            <label for="opacity">opacity</label>
                         </div>
+                        <div class="pixel-perfect__items js-pixel-perfect-items"></div>
+                        <button class="pixel-perfect__control js-pixel-perfect-control">
+                            <span>Открыть</span>
+                        </button>
                     </div>
                 `);
                 this.$section.append(`<div class="pixel-perfect__image js-pixel-perfect-image"></div>`);
-                let $pixelPerfectControl = this.$body.find(".pixel-perfect__control");
+                this.$items = this.$body.find(".js-pixel-perfect-items");
+                this.$image = this.$body.find(".js-pixel-perfect-image");
                 $(JSON.parse(data).images).each((index, item) => {
-                    $pixelPerfectControl.append(`
-                        <button class="btn btn-secondary js-pixel-perfect-control-extension" data-src="${item.SRC}">${item.WIDTH} x ${item.HEIGHT}</button>
+                    this.$items.append(`
+                        <button class="pixel-perfect__item js-pixel-perfect-item" data-width="${item.WIDTH}" data-height="${item.HEIGHT}" data-src="${item.SRC}">${item.WIDTH} x ${item.HEIGHT}</button>
                     `);
                 });
             }
         }).then(
             (data) => {
-                this.buttonOpenClose = this.$body.find(".js-pixel-perfect-control-open-close");
-                this.buttonExtension = this.$body.find(".js-pixel-perfect-control-extension");
-                this.buttonOpenClose.on("click", () => {
-                    if(this.buttonOpenClose.hasClass("btn-success")){
-                        this.buttonOpenClose.removeClass("btn-success");
-                        this.buttonOpenClose.addClass("btn-danger");
-                        this.buttonOpenClose.html("Закрыть");
-                        $(".pixel-perfect span").show();
-                        this.buttonExtension.addClass("d-flex");
-                    }else{
-                        this.buttonOpenClose.addClass("btn-success");
-                        this.buttonOpenClose.removeClass("btn-danger");
-                        this.buttonOpenClose.html("Открыть");
-                        $(".pixel-perfect span").hide();
-                        this.buttonExtension.removeClass("d-flex");
+                let $item = this.$body.find(".js-pixel-perfect-item"),
+                    $control = this.$body.find(".js-pixel-perfect-control"),
+                    $settings = this.$body.find(".js-pixel-perfect-settings"),
+                    $range = this.$body.find(".js-pixel-perfect-settings input");
+
+                if (this.widthImage && this.heightImage) {
+                    $control.html(`${this.widthImage} x ${this.heightImage}`);
+                }
+
+                $item.each((index, item) => {
+                    let $item = $(item),
+                        height = $item.data("height"),
+                        width = $item.data("width"),
+                        src = $item.data("src");
+
+                    if (width === this.widthImage && height === this.heightImage) {
+                        $item.addClass("active");
+                        this.$image.html(`<img src="${src}" alt="pixel-perfect-image">`);
                     }
                 });
-                this.buttonExtension.on("click", (e) => {
-                    e = e.originalEvent;
-                    let $this = $(e.target);
-                    this.buttonExtension.addClass("btn-secondary").removeClass("btn-outline-secondary");
 
-                    if($this.hasClass("on")){
-                        $this.removeClass("on");
-                        $this.removeClass("btn-outline-secondary");
-                        $this.addClass("btn-secondary");
-                        this.$body.find(".pixel-perfect__image").html("");
-                    }else{
-                        $this.addClass("on");
-                        $this.removeClass("btn-secondary");
-                        $this.addClass("btn-outline-secondary");
-                        this.$body.find(".pixel-perfect__image").html(`
-                            <img src="${$this.data("src")}" alt="pixel-perfect-image" >
-                        `);
+                if(this.opacityImage){
+                    $range.val(this.opacityImage);
+                    this.$image.css({"opacity": `${this.opacityImage}%`});
+                    this.opacityImage === 0 ? this.$image.hide() : this.$image.show();
+                }
+
+                $control.on("click", () => {
+                    this.widthImage = localStorage.getItem("EXTENSION_WIDTH");
+                    this.heightImage = localStorage.getItem("EXTENSION_HEIGHT");
+                    $control.toggleClass("open");
+                    this.$items.toggleClass("flex");
+                    $settings.toggleClass("flex");
+                    if ($control.hasClass("open")) {
+                        $control.html("Закрыть");
+                    } else if (this.widthImage && this.heightImage) {
+                        $control.html(`${this.widthImage} x ${this.heightImage}`);
+                    } else {
+                        $control.html("Открыть");
                     }
+                });
+
+                $item.on("click", (e) => {
+                    e = e.originalEvent;
+                    let $this = $(e.target),
+                        height = $this.data("height"),
+                        width = $this.data("width"),
+                        src = $this.data("src");
+
+                    if (width !== Number(localStorage.getItem("EXTENSION_WIDTH"))) {
+                        $item.removeClass("active");
+                        this.$image.html("");
+                    }
+                    if ($this.hasClass("active")) {
+                        localStorage.setItem("EXTENSION_WIDTH", "");
+                        localStorage.setItem("EXTENSION_HEIGHT", "");
+                        this.$image.html("");
+                    } else {
+                        localStorage.setItem("EXTENSION_WIDTH", `${width}`);
+                        localStorage.setItem("EXTENSION_HEIGHT", `${height}`);
+                        this.$image.html(`<img src="${src}" alt="pixel-perfect-image">`);
+                    }
+                    $this.toggleClass("active");
+                });
+
+                $range.on("change", (e) => {
+                    e = e.originalEvent;
+                    let opacity = Number($(e.target).val());
+                    localStorage.setItem("OPACITY_IMAGE", `${opacity}`);
+                    this.$image.css({"opacity": `${opacity}%`});
+                    opacity === 0 ? this.$image.hide() : this.$image.show();
                 });
             }
         );
