@@ -21,7 +21,7 @@ class PixelPerfect{
                 this.$body.append(`
                     <div class="pixel-perfect">
                         <div class="pixel-perfect__settings js-pixel-perfect-settings">
-                            <input type="range" id="opacity" name="opacity" min="0" max="100" step="10">
+                            <input type="range" id="opacity" name="opacity" min="0" max="100" step="1">
                             <label for="opacity">opacity</label>
                         </div>
                         <div class="pixel-perfect__items js-pixel-perfect-items"></div>
@@ -106,7 +106,7 @@ class PixelPerfect{
                     $this.toggleClass("active");
                 });
 
-                $range.on("change", (e) => {
+                $range.on("input", (e) => {
                     e = e.originalEvent;
                     let opacity = Number($(e.target).val());
                     localStorage.setItem("OPACITY_IMAGE", `${opacity}`);
