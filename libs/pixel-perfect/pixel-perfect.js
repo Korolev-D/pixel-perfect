@@ -8,8 +8,8 @@ class PixelPerfect{
     constructor(section, path = ""){
         this.$section = $(section);
         this.$body = $("body");
-        this.widthImage = Number(localStorage.getItem("EXTENSION_WIDTH"));
-        this.heightImage = Number(localStorage.getItem("EXTENSION_HEIGHT"));
+        this.widthImage = Number(localStorage.getItem("WIDTH_IMAGE"));
+        this.heightImage = Number(localStorage.getItem("HEIGHT_IMAGE"));
         this.opacityImage = Number(localStorage.getItem("OPACITY_IMAGE"));
         this.$body.html(this.$section);
 
@@ -69,8 +69,8 @@ class PixelPerfect{
                 }
 
                 $control.on("click", () => {
-                    this.widthImage = localStorage.getItem("EXTENSION_WIDTH");
-                    this.heightImage = localStorage.getItem("EXTENSION_HEIGHT");
+                    this.widthImage = localStorage.getItem("WIDTH_IMAGE");
+                    this.heightImage = localStorage.getItem("HEIGHT_IMAGE");
                     $control.toggleClass("open");
                     this.$items.toggleClass("flex");
                     $settings.toggleClass("flex");
@@ -90,17 +90,17 @@ class PixelPerfect{
                         width = $this.data("width"),
                         src = $this.data("src");
 
-                    if (width !== Number(localStorage.getItem("EXTENSION_WIDTH"))) {
+                    if (width !== Number(localStorage.getItem("WIDTH_IMAGE"))) {
                         $item.removeClass("active");
                         this.$image.html("");
                     }
                     if ($this.hasClass("active")) {
-                        localStorage.setItem("EXTENSION_WIDTH", "");
-                        localStorage.setItem("EXTENSION_HEIGHT", "");
+                        localStorage.setItem("WIDTH_IMAGE", "");
+                        localStorage.setItem("HEIGHT_IMAGE", "");
                         this.$image.html("");
                     } else {
-                        localStorage.setItem("EXTENSION_WIDTH", `${width}`);
-                        localStorage.setItem("EXTENSION_HEIGHT", `${height}`);
+                        localStorage.setItem("WIDTH_IMAGE", `${width}`);
+                        localStorage.setItem("HEIGHT_IMAGE", `${height}`);
                         this.$image.html(`<img src="${src}" alt="pixel-perfect-image">`);
                     }
                     $this.toggleClass("active");
